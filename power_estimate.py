@@ -33,19 +33,23 @@ PREC = 2        # precision for calculations
 def integrand(x):
     return V*I*sin(2*pi*f*x)**2
 
-MAX, _ = quad(integrand, 0, HALF_P)
-for i in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
-    power = MAX*i
-    estimate = [floor(power*(10**PREC)), ceil(power*(10**PREC))]
-    results = []
+def main():
+    MAX, _ = quad(integrand, 0, HALF_P)
+    for i in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+        power = MAX*i
+        estimate = [floor(power*(10**PREC)), ceil(power*(10**PREC))]
+        results = []
 
-    for start in linspace(0, HALF_P, 500):
-        res, _ = quad(integrand, start, HALF_P)
-        #print res
-        if int(res*(10**PREC)) in estimate:
-            results.append(start)
+        for start in linspace(0, HALF_P, 500):
+            res, _ = quad(integrand, start, HALF_P)
+            #print res
+            if int(res*(10**PREC)) in estimate:
+                results.append(start)
 
-    mean = sum(results)/len(results)
-    solution = int(DIM_MAX*mean/HALF_P + DIM_MIN)
+        mean = sum(results)/len(results)
+        solution = int(DIM_MAX*mean/HALF_P + DIM_MIN)
 
-    print solution, int(i*100), '%'
+        print solution, int(i*100), '%'
+
+if __name__ == '__main__':
+    main()
