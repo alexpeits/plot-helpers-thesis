@@ -20,6 +20,7 @@ providing us with a result - of course with an error.
 from numpy import sin, linspace, pi
 from scipy.integrate import quad
 from scipy.interpolate import interp1d # C's 'map' function
+import json
 
 
 f = 50          # mains frequency
@@ -68,8 +69,14 @@ def main():
 
     conv = interp1d([min(solutions), max(solutions)], [DIM_MIN, DIM_MAX])
     mapped_sol = conv(solutions)
-    print [int(i) for i in mapped_sol] # = DIM_TABLE
+    return [int(i) for i in mapped_sol] # = DIM_TABLE
 
 
 if __name__ == '__main__':
-    main()
+    DIM_TABLE = main()
+    print DIM_TABLE
+
+    with open('dim_table.json', 'w') as f:
+        f.write(json.dumps(DIM_TABLE))
+
+
