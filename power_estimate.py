@@ -19,7 +19,8 @@ providing us with a result - of course with an error.
 
 from numpy import sin, linspace, pi
 from scipy.integrate import quad
-from math import floor, ceil
+from scipy.interpolate import interp1d # C's 'map' function
+
 
 f = 50          # mains frequency
 V = 325         # Vrms*sqrt(2)
@@ -28,28 +29,47 @@ HALF_P = 0.5/f  # half period of the wave
 DIM_MAX = 600   # max value dictated by the dimmer..
 DIM_MIN = 50    # .. and min value
 PREC = 2        # precision for calculations
+# Absolute tolerance for comparisons. If one value
+# yields no results, we move on to a greater one,
+# thus to a larger error.
+tolerance = [i/1000.0 for i in xrange(10)]
 
+
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    """
+    Implementation of the `math.isclose` method
+    which is provided in python 3.5, as described
+    in the documentation.
+
+    """
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 def integrand(x):
     return V*I*sin(2*pi*f*x)**2
 
 def main():
+    solutions = []
     MAX, _ = quad(integrand, 0, HALF_P)
     for i in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         power = MAX*i
-        estimate = [floor(power*(10**PREC)), ceil(power*(10**PREC))]
         results = []
 
-        for start in linspace(0, HALF_P, 500):
-            res, _ = quad(integrand, start, HALF_P)
-            #print res
-            if int(res*(10**PREC)) in estimate:
-                results.append(start)
+        for tol in tolerance:
+            if len(results) > 0:
+                break
+            for start in linspace(0, HALF_P, 1000):
+                res, _ = quad(integrand, start, HALF_P)
+                #print res
+                if isclose(res, power, abs_tol=tol):
+                    results.append(start)
 
         mean = sum(results)/len(results)
-        solution = int(DIM_MAX*mean/HALF_P + DIM_MIN)
+        solutions.append(mean)
 
-        print solution, int(i*100), '%'
+    conv = interp1d([min(solutions), max(solutions)], [DIM_MIN, DIM_MAX])
+    mapped_sol = conv(solutions)
+    print [int(i) for i in mapped_sol] # = DIM_TABLE
+
 
 if __name__ == '__main__':
     main()
