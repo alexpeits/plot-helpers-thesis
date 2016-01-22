@@ -48,7 +48,8 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 def integrand(x):
     return V*I*sin(2*pi*f*x)**2
 
-def main():
+def construct_table():
+    """:rtype: list"""
     solutions = []
     MAX, _ = quad(integrand, 0, HALF_P)
     for i in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
@@ -73,7 +74,7 @@ def main():
 
 
 if __name__ == '__main__':
-    DIM_TABLE = main()
+    DIM_TABLE = construct_table()
     print DIM_TABLE
 
     with open('dim_table.json', 'w') as f:
